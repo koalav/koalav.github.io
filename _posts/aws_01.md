@@ -1,0 +1,165 @@
+```
+---
+layout: post
+title:  "AWS Associate architect 정리중"
+---
+```
+
+
+
+AWS
+
+* 기본개념
+  * Region과 AZ, Edge location
+    * Region 과 AZ(Availability Zone)
+      * Region 내에 AZ가 여러 개 있다.
+      * 물리적으로 분리되어있어서 장애 발생시 위험도 낮춤
+    * CloudFront - Edge location에 위치. CDN역할
+      * cache응답, 없으면 S3 or HTTP 요청으로 전환할 수 있음 (EC2, ALB, ..)
+
+  * Storage
+    * snow family
+      * 엣지 컴퓨팅 / 데이터 마이그레이션 디바이스
+      * 페타바이트급 데이터를 aws로 이전하거나 엣지에서 데이터를 처리
+      * 용량순 snowball < snowball < snowmobile
+
+    * S3 - SImple Storage Service
+      * S3 Storage Gateway
+        * 온프레미스 애플리케이션 서버에서 iSCSI (Internet Small Computer System Interface) 디바이스로 마운트할 수 있는 클라우드 지원 스토리지 볼륨과 온프레미스 소프트웨어 
+          애플리케이션을 연결합니다. 캐시된 볼륨 모드에서는 모든 데이터가 Amazon S3 에 저장되고 자주 액세스하는 데이터의 사본이 로컬에 저장됩니다.
+
+    * EFS - Elastic File System
+    * EBS - Elastic Block Store
+
+  * DB
+    * AWS RDS - 여러 database 지원
+      * Postgres, MySQL, MariaDB, Oracle, Microsoft SQL Server, Aurora (AWS Proprietary database)
+
+    * Dynamo DB
+      * key-value 데이터베이스
+
+    * ElasticCache
+      * Redis
+        * backup & restore, multi AZ with Auto-Failover (High Availibility)
+
+      * Memcached
+        * no backup and restore, No high availability, sharding and multi threaded
+
+  * Computing
+    * EC2 - Elastic Computing
+      * RAM을 저장하고 싶은면 최대 절전 모드(hibernate)
+      * spot instance - 중단할 수 없거나 특정 시간 내에 완료해야 하는 작업에는 적절하지 않다.
+      * on-demand instance - 실행 시간별로 비용이 청구된다.
+      * AMI - Amazon Machine Image
+
+    * Lambda - serverless computing
+
+  * Load Balancing / Scailing
+    * ELB - Elastic Load Balancer
+      * ALB
+      * CLB
+      * NLB
+      * GWLB
+
+    * ASG - Auto Scailing Groups
+
+  * Security
+    * IAM -  Identity and Access Management
+    * WAF - Web Application Firewall
+    * AWS KMS encryption
+
+  * Networking
+    * VPC - Virtual Private Cloud
+      * https://pjh3749.tistory.com/283
+
+      * IGA - Internet Gateway
+        * VPC의 인스턴스와 인터넷 간 통신
+
+      * SG - Security Group
+        * 인스턴스 단위로 적용. Stateful. Allow rule만 있다 / NACL보다 우선순위 높음
+
+      * NACL -Network ACL
+        * Stateless  / subnet 단위 적용 / allow / deny rule
+
+      * Route Table
+      * NAT Gateway
+        * public subnet에 연결 / private subnet 트래픽을 IGA로 중계할 수 있음
+        * 프라이빗 서브넷의 인스턴스에서 인터넷 또는 다른 AWS 서비스로 트래픽을 전달한 다음 응답을 인스턴스로 다시 보냅니다. NAT 게이트웨이가 생성된 후에는 인터넷 트래픽이 NAT 게이트웨이를 가리키도록 프라이빗 서브넷의 라우팅 테이블을 업데이트해야 합니다.
+
+      * VPC Endpoint
+        * VPC와 VPC endpoint 간의 비공개 연결 가능
+        * Gateway Endpoint - S3/Dynamo DB등
+        * Interface Endpoint
+
+      * Direct Connect
+        * 온프레미스에서 AwS로 전용 네트워크 연결
+
+      * VPC Peering 
+        * private IP를 통해 VPC와 VPC간 연결
+
+    * Elastic Network Interface
+      * 기본 ENI는 인스턴스에서 분리할 수 없지만 보조ENI는 분리하여 다른 인스턴스에 연결할 수 있습니다.
+
+  * Decoupling applications
+    * SQS - Simple Queue Service
+      * producer가 send message / consumer가 poll 하여 가져감 (decoupling)
+      * unlimited throughput / number of messages in queue
+      * message retention : default 4 days, up to 14 days
+      * low latency(<10ms), Limitation of 256KB per message sent
+      * FIFO Queue
+        * Limited throughput : 300msg/s without batching, 3000msg/s with
+        * Exactly-once send capability (by removing duplicates)
+
+      * ex) CloudWatch Metric - Queue Length -> CloudWatch Alarm -> ASG to scale up EC2 Instance
+      * Security
+        * In-flight encryption using HTTPS API
+        * At-rest encryption using KMS keys
+        * Client-side encryption if the client wants to perform encryption/decryption itself
+
+    * SNS - Simple Notification Service
+      * pub / sub 모델
+      * one producer / multi receivers per topic
+      * Up to 12,500,000 subscriptions per topic / 100,000 topics limit
+      * Message Filtering - JSON 정의, Filter Policy를 subscriber별로 정할 수 있음
+      * Fan Out Pattern
+        * 1 SNS - multi SQS 
+
+    * Kinesis
+      * collect/process/analyze streaming data in **real-time**
+      * Data Streams / Data Firehose / Data Analytics / Video Streams
+
+    * SNS/SQS/Kinesis
+    * Active MQ
+
+  * Containers
+    * ECS
+    * Fargate
+    * ECR
+    * EKS
+
+  * Monitoring & Audit
+    * CloudWatch
+    * CloudTrail
+
+
+
+
+
+
+* Edge Network
+  * amazon cloudfront
+* Amazon Route53
+  * cloud DNS service
+  * 도메인 네임을 IP로 변경해줌
+* AWS Global Services (region 무관)
+  * Identity and Access Management(IAM)
+  * Route 53 (DNS service)
+  * CloudFront (Content Delivery Network)
+  * WAS (Web Application Firewall)
+* Most AWS services are Region-scoped
+* IAM - Identity and Access Management
+  * root account / Users
+  * Users를 group으로 organization하고 권한을 부여 
+  * Policies라는 json document에 users and groups 정의
+  * least privilege principle - 기본적으로 all deny
+
